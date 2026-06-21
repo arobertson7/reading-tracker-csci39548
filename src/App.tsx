@@ -15,9 +15,9 @@ function App() {
 
   const [userBooks, setUserBooks] = useState<Book[]>([
     { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish },
-    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions},
-    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark},
-    { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable}
+    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions },
+    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark },
+    { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable }
   ]);
   const [queriedBooks, setQueriedBooks] = useState<Book[]>([]);
 
@@ -28,24 +28,24 @@ function App() {
 
   async function fetchSearchResults(query: string) {
     try {
-        const url = OPEN_LIBRARY_URL + query + "&limit=40";
-        const response = await fetch(url);
-        const data = await response.json();
+      const url = OPEN_LIBRARY_URL + query + "&limit=40";
+      const response = await fetch(url);
+      const data = await response.json();
 
-        const book_results = data.docs as OpenLibraryBook[];
-        const updatedQueriedBooks: Book[] = book_results.map((book_data) => ({
-          id: book_data.key,
-          title: book_data.title,
-          author: book_data.author_name ? book_data.author_name.join(", ") : "Unknown Author",
-          year_published: book_data.first_publish_year,
-          cover_url: book_data.cover_i ? `https://covers.openlibrary.org/b/id/${book_data.cover_i}-M.jpg` : noBookCover
-        }));
-        
-        setQueriedBooks(updatedQueriedBooks);
+      const book_results = data.docs as OpenLibraryBook[];
+      const updatedQueriedBooks: Book[] = book_results.map((book_data) => ({
+        id: book_data.key,
+        title: book_data.title,
+        author: book_data.author_name ? book_data.author_name.join(", ") : "Unknown Author",
+        year_published: book_data.first_publish_year,
+        cover_url: book_data.cover_i ? `https://covers.openlibrary.org/b/id/${book_data.cover_i}-M.jpg` : noBookCover
+      }));
+
+      setQueriedBooks(updatedQueriedBooks);
 
     } catch (error) {
-        console.error("Error fetching library results:", error);
-        setQueriedBooks([]);
+      console.error("Error fetching library results:", error);
+      setQueriedBooks([]);
     }
   }
 
@@ -58,13 +58,13 @@ function App() {
         </header>
 
         <nav className="sidebar-nav">
-          <button 
+          <button
             className={`nav-item ${displayMode === "userLibrary" ? "active" : ""}`}
             onClick={() => setDisplayMode("userLibrary")}
           >
             <span className="nav-icon">📚</span> My Library
           </button>
-          <button 
+          <button
             className={`nav-item ${displayMode === "searchBooks" ? "active" : ""}`}
             onClick={() => setDisplayMode("searchBooks")}
           >
@@ -78,12 +78,18 @@ function App() {
       </aside>
 
       <main className="main-content">
-        {displayMode === "searchBooks" && <SearchBar onSearch={fetchSearchResults}/>}
-        
+        {displayMode === "searchBooks" && <SearchBar onSearch={fetchSearchResults} />}
+
         <section className='book-collection'>
           <h2>{displayMode === "userLibrary" ? "My Library" : "Search Results"}</h2>
           <div className='book-grid'>
-            {displayedBooks.map((book) => <BookCard key={book.id} book={book} />)}
+            {displayedBooks.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                displayMode={displayMode}
+              />
+            ))}
           </div>
         </section>
       </main>

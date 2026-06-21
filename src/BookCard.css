@@ -1,4 +1,3 @@
-
 /* Card container with elegant transitions and micro-interactions */
 .book-card {
   background-color: var(--card-bg);
@@ -102,8 +101,52 @@
   font-size: 0.76rem;
   color: var(--text-secondary);
   margin: 0;
+  margin-bottom: 1.15rem;
+  /* Guarantees minimum space before the button */
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Cozy Warm Button Styling with micro-interactions */
+.book-card-button {
+  margin-top: auto;
+  /* Pushes the button to the bottom of the card */
+  align-self: center;
+  /* Centers the button and shrinks it to fit its text */
+  padding: 0.45rem 1.1rem;
+  /* Compact padding for a smaller footprint */
+  border-radius: 20px;
+  /* Elegant pill-shaped design */
+  border: 1px solid var(--border-color);
+  background-color: var(--accent-light);
+  color: var(--accent);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: var(--transition-base);
+}
+
+/* Ensure container card adjusts size gracefully for the button */
+.book-card:has(.book-card-button) {
+  min-height: 325px;
+}
+
+/* Hover effects */
+.book-card-button:hover {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.book-card-button:active {
+  transform: translateY(0);
 }
