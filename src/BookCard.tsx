@@ -1,7 +1,7 @@
 import './BookCard.css';
 
 interface Book {
-  id: number; // the value of the "key" field in OpenLibrary API which uniquely identifies the Work
+  id: string; // the value of the "key" field in OpenLibrary API which uniquely identifies the Work
   title: string;
   author: string;
   year_published: number;
