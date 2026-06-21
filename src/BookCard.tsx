@@ -17,6 +17,7 @@ function BookCard({ book, displayMode }: BookCardProps) {
 
   return (
     <div className="book-card">
+
       <div className="book-cover-wrapper">
         <img
           className="book-cover"
@@ -25,17 +26,20 @@ function BookCard({ book, displayMode }: BookCardProps) {
         />
         <div className="book-spine-crease"></div>
       </div>
+
       <div className="book-info">
         <h3 className="book-title" title={`${book.title} (${book.year_published})`}>
           {book.title} <span className="book-year">({book.year_published})</span>
         </h3>
         <p className="book-author">by {book.author}</p>
+
         {displayMode === "searchBooks" && (
           <button className="book-card-button" type="button">
             + Add to Library
           </button>
         )}
       </div>
+
     </div>
   )
 }
