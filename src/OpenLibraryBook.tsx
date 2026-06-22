@@ -1,4 +1,3 @@
-
 interface OpenLibraryBook {
   key: string;
   title: string;
