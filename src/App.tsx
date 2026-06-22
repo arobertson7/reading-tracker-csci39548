@@ -49,6 +49,21 @@ function App() {
     }
   }
 
+  function inUserLibrary(bookId: string) {
+    for (const userBook of userBooks) {
+      if (userBook.id === bookId) return true;
+    }
+    return false;
+  }
+
+  function toggleAddToUserLibrary(book: Book) {
+    if (inUserLibrary(book.id)) { // remove from library
+      setUserBooks(userBooks.filter((userBook) => userBook.id != book.id));
+      return;
+    }
+    setUserBooks([...userBooks, book]); // add to library
+  }
+
   return (
     <div className="app-container">
       <aside className="sidebar">
@@ -88,6 +103,8 @@ function App() {
                 key={book.id}
                 book={book}
                 displayMode={displayMode}
+                onToggleAddToLibrary={toggleAddToUserLibrary}
+                addedToLibrary={inUserLibrary(book.id)}
               />
             ))}
           </div>

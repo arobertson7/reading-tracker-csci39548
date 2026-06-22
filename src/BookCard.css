@@ -150,3 +150,30 @@
 .book-card-button:active {
   transform: translateY(0);
 }
+
+/* Styling when the book is added to the library */
+.book-card-button.added {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-color: #c8e6c9;
+}
+
+.book-card-button.added:hover {
+  background-color: #2e7d32;
+  color: #ffffff;
+  border-color: #2e7d32;
+}
+
+@media (prefers-color-scheme: dark) {
+  .book-card-button.added {
+    background-color: #1b4332;
+    color: #81c784;
+    border-color: #2d6a4f;
+  }
+
+  .book-card-button.added:hover {
+    background-color: #2d6a4f;
+    color: #ffffff;
+    border-color: #2d6a4f;
+  }
+}
