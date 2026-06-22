@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
-import { type Book, BookCard } from './BookCard'
+import { type Book } from './Book.tsx'
+import { UserLibraryBookCard } from './UserLibraryBookCard.tsx'
+import { SearchResultBookCard } from './SearchResultBookCard'
 import SearchBar from './SearchBar'
 import { type OpenLibraryBook } from './OpenLibraryBook'
 import noBookCover from './assets/no-cover.png'
@@ -97,17 +99,30 @@ function App() {
 
         <section className='book-collection'>
           <h2>{displayMode === "userLibrary" ? "My Library" : "Search Results"}</h2>
-          <div className='book-grid'>
-            {displayedBooks.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                displayMode={displayMode}
-                onToggleAddToLibrary={toggleAddToUserLibrary}
-                addedToLibrary={inUserLibrary(book.id)}
-              />
-            ))}
-          </div>
+          {/* USER LIBRARY VIEW */}
+          {displayMode === "userLibrary"
+            && <div className='book-grid'>
+                {displayedBooks.map((book) => (
+                  <UserLibraryBookCard
+                    key={book.id}
+                    book={book}
+                  />
+                ))}
+              </div>
+          }
+          {/* SEARCH BOOKS VIEW */}
+          {displayMode === "searchBooks"
+            && <div className='book-grid'>
+                {displayedBooks.map((book) => (
+                  <SearchResultBookCard
+                    key={book.id}
+                    book={book}
+                    onToggleAddToLibrary={toggleAddToUserLibrary}
+                    addedToLibrary={inUserLibrary(book.id)}
+                  />
+                ))}
+              </div>
+          }
         </section>
       </main>
 

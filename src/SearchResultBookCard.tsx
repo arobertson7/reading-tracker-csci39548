@@ -1,22 +1,14 @@
 import { useState } from 'react';
+import { type Book } from './Book.tsx'
 import './BookCard.css';
 
-interface Book {
-  id: string; // the value of the "key" field in OpenLibrary API which uniquely identifies the Work
-  title: string;
-  author: string;
-  year_published: number;
-  cover_url: string;
-}
-
-interface BookCardProps {
+interface SearchResultBookCardProps {
   book: Book;
-  displayMode: string; // "userLibrary" or "searchBooks"
   onToggleAddToLibrary: (book: Book) => void;
   addedToLibrary: boolean;
 }
 
-function BookCard({ book, displayMode, onToggleAddToLibrary, addedToLibrary }: BookCardProps) {
+function SearchResultBookCard({ book, onToggleAddToLibrary, addedToLibrary }: SearchResultBookCardProps) {
   const [inUserLibrary, setInUserLibrary] = useState<boolean>(addedToLibrary);
 
   function handleToggleAddToLibrary() {
@@ -42,19 +34,18 @@ function BookCard({ book, displayMode, onToggleAddToLibrary, addedToLibrary }: B
         </h3>
         <p className="book-author">by {book.author}</p>
 
-        {displayMode === "searchBooks" && (
-          <button
-            className={`book-card-button ${inUserLibrary ? 'added' : ''}`}
-            type="button"
-            onClick={handleToggleAddToLibrary}
-          >
-            {inUserLibrary ? "✓ Added to Library" : "+ Add to Library"}
-          </button>
-        )}
+        <button
+          className={`book-card-button ${inUserLibrary ? 'added' : ''}`}
+          type="button"
+          onClick={handleToggleAddToLibrary}
+        >
+          {inUserLibrary ? "✓ Added to Library" : "+ Add to Library"}
+        </button>
+        
       </div>
 
     </div>
   )
 }
 
-export { BookCard, type Book };
+export { SearchResultBookCard };
