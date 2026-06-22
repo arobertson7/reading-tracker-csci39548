@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import './BookCard.css';
 
 interface Book {
@@ -10,14 +11,17 @@ interface Book {
 
 interface BookCardProps {
   book: Book;
-  displayMode?: string; // "userLibrary" or "searchBooks"
-  onAddToLibrary: (book: Book) => void;
+  displayMode: string; // "userLibrary" or "searchBooks"
+  onToggleAddToLibrary: (book: Book) => void;
+  addedToLibrary: boolean;
 }
 
-function BookCard({ book, displayMode, onAddToLibrary }: BookCardProps) {
+function BookCard({ book, displayMode, onToggleAddToLibrary, addedToLibrary }: BookCardProps) {
+  const [inUserLibrary, setInUserLibrary] = useState<boolean>(addedToLibrary);
 
-  function handleAddToLibrary() {
-    onAddToLibrary(book);
+  function handleToggleAddToLibrary() {
+    setInUserLibrary(!inUserLibrary);
+    onToggleAddToLibrary(book);
   }
 
   return (
@@ -39,8 +43,12 @@ function BookCard({ book, displayMode, onAddToLibrary }: BookCardProps) {
         <p className="book-author">by {book.author}</p>
 
         {displayMode === "searchBooks" && (
-          <button className="book-card-button" type="button" onClick={handleAddToLibrary}>
-            + Add to Library
+          <button
+            className={`book-card-button ${inUserLibrary ? 'added' : ''}`}
+            type="button"
+            onClick={handleToggleAddToLibrary}
+          >
+            {inUserLibrary ? "✓ Added to Library" : "+ Add to Library"}
           </button>
         )}
       </div>

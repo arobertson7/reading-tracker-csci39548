@@ -49,12 +49,19 @@ function App() {
     }
   }
 
-  function addToUserLibrary(book: Book) {
-    // return if book is already in user's library
+  function inUserLibrary(bookId: string) {
     for (const userBook of userBooks) {
-      if (userBook.id === book.id) return;
+      if (userBook.id === bookId) return true;
     }
-    userBooks.push(book);
+    return false;
+  }
+
+  function toggleAddToUserLibrary(book: Book) {
+    if (inUserLibrary(book.id)) { // remove from library
+      setUserBooks(userBooks.filter((userBook) => userBook.id != book.id));
+      return;
+    }
+    setUserBooks([...userBooks, book]); // add to library
   }
 
   return (
@@ -96,7 +103,8 @@ function App() {
                 key={book.id}
                 book={book}
                 displayMode={displayMode}
-                onAddToLibrary={addToUserLibrary}
+                onToggleAddToLibrary={toggleAddToUserLibrary}
+                addedToLibrary={inUserLibrary(book.id)}
               />
             ))}
           </div>
