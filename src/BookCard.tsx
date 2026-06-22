@@ -11,9 +11,14 @@ interface Book {
 interface BookCardProps {
   book: Book;
   displayMode?: string; // "userLibrary" or "searchBooks"
+  onAddToLibrary: (book: Book) => void;
 }
 
-function BookCard({ book, displayMode }: BookCardProps) {
+function BookCard({ book, displayMode, onAddToLibrary }: BookCardProps) {
+
+  function handleAddToLibrary() {
+    onAddToLibrary(book);
+  }
 
   return (
     <div className="book-card">
@@ -34,7 +39,7 @@ function BookCard({ book, displayMode }: BookCardProps) {
         <p className="book-author">by {book.author}</p>
 
         {displayMode === "searchBooks" && (
-          <button className="book-card-button" type="button">
+          <button className="book-card-button" type="button" onClick={handleAddToLibrary}>
             + Add to Library
           </button>
         )}

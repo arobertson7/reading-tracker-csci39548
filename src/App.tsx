@@ -49,6 +49,14 @@ function App() {
     }
   }
 
+  function addToUserLibrary(book: Book) {
+    // return if book is already in user's library
+    for (const userBook of userBooks) {
+      if (userBook.id === book.id) return;
+    }
+    userBooks.push(book);
+  }
+
   return (
     <div className="app-container">
       <aside className="sidebar">
@@ -88,6 +96,7 @@ function App() {
                 key={book.id}
                 book={book}
                 displayMode={displayMode}
+                onAddToLibrary={addToUserLibrary}
               />
             ))}
           </div>
