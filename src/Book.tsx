@@ -6,4 +6,13 @@ interface Book {
   cover_url: string;
 }
 
-export { type Book }
+interface UserLibraryBook extends Book {
+  readingStatus: ReadingStatus;
+  rating?: BookRating;
+  dateAdded: Date;
+}
+
+type ReadingStatus = 'to-read' | 'reading' | 'finished';
+type BookRating = 1 | 2 | 3 | 4 | 5;
+
+export { type Book, type UserLibraryBook }

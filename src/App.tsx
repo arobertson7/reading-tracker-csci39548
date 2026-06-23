@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { type Book } from './Book.tsx'
+import { type Book, type UserLibraryBook } from './Book.tsx'
 import { UserLibraryBookCard } from './UserLibraryBookCard.tsx'
 import { SearchResultBookCard } from './SearchResultBookCard'
 import SearchBar from './SearchBar'
@@ -15,16 +15,13 @@ import unbearable from './assets/unbearable.jpg' // temporary for sample book co
 function App() {
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
 
-  const [userBooks, setUserBooks] = useState<Book[]>([
-    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish },
-    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions },
-    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark },
-    { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable }
+  const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
+    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'to-read', dateAdded: new Date() },
+    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', dateAdded: new Date() },
+    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date() },
+    { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
   ]);
-  const [queriedBooks, setQueriedBooks] = useState<Book[]>([]);
-
-  // Choose which books to show depending on displayMode
-  const displayedBooks = displayMode === "userLibrary" ? userBooks : queriedBooks;
+  const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
 
   const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
@@ -35,7 +32,7 @@ function App() {
       const data = await response.json();
 
       const book_results = data.docs as OpenLibraryBook[];
-      const updatedQueriedBooks: Book[] = book_results.map((book_data) => ({
+      const updatedsearchResultBooks: Book[] = book_results.map((book_data) => ({
         id: book_data.key,
         title: book_data.title,
         author: book_data.author_name ? book_data.author_name.join(", ") : "Unknown Author",
@@ -43,27 +40,37 @@ function App() {
         cover_url: book_data.cover_i ? `https://covers.openlibrary.org/b/id/${book_data.cover_i}-M.jpg` : noBookCover
       }));
 
-      setQueriedBooks(updatedQueriedBooks);
+      setSearchResultBooks(updatedsearchResultBooks);
 
     } catch (error) {
       console.error("Error fetching library results:", error);
-      setQueriedBooks([]);
+      setSearchResultBooks([]);
     }
   }
 
   function inUserLibrary(bookId: string) {
-    for (const userBook of userBooks) {
-      if (userBook.id === bookId) return true;
+    for (const userLibraryBook of userLibraryBooks) {
+      if (userLibraryBook.id === bookId) return true;
     }
     return false;
   }
 
   function toggleAddToUserLibrary(book: Book) {
-    if (inUserLibrary(book.id)) { // remove from library
-      setUserBooks(userBooks.filter((userBook) => userBook.id != book.id));
+    // remove from library
+    if (inUserLibrary(book.id)) {
+      setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
       return;
     }
-    setUserBooks([...userBooks, book]); // add to library
+    // add to library
+    setUserLibraryBooks([...userLibraryBooks, {
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      year_published: book.year_published,
+      cover_url: book.cover_url,
+      readingStatus: 'to-read',
+      dateAdded: new Date()
+    }]);
   }
 
   return (
@@ -99,10 +106,11 @@ function App() {
 
         <section className='book-collection'>
           <h2>{displayMode === "userLibrary" ? "My Library" : "Search Results"}</h2>
+
           {/* USER LIBRARY VIEW */}
           {displayMode === "userLibrary"
             && <div className='book-grid'>
-                {displayedBooks.map((book) => (
+                {userLibraryBooks.map((book) => (
                   <UserLibraryBookCard
                     key={book.id}
                     book={book}
@@ -113,7 +121,7 @@ function App() {
           {/* SEARCH BOOKS VIEW */}
           {displayMode === "searchBooks"
             && <div className='book-grid'>
-                {displayedBooks.map((book) => (
+                {searchResultBooks.map((book) => (
                   <SearchResultBookCard
                     key={book.id}
                     book={book}
@@ -124,6 +132,7 @@ function App() {
               </div>
           }
         </section>
+        
       </main>
 
       <footer className="mobile-footer">
