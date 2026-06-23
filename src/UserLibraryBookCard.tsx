@@ -4,15 +4,14 @@ import './BookCard.css';
 
 interface UserLibraryBookCardProps {
   book: UserLibraryBook;
+  onRemoveFromLibrary: (book: UserLibraryBook) => void;
 }
 
-function UserLibraryBookCard({ book }: UserLibraryBookCardProps) {
-  // const [inUserLibrary, setInUserLibrary] = useState<boolean>(removedFromLibrary);
+function UserLibraryBookCard({ book, onRemoveFromLibrary }: UserLibraryBookCardProps) {
 
-  // function handleRemoveFromLibrary() {
-  //   setInUserLibrary(!inUserLibrary);
-  //   onToggleAddToLibrary(book);
-  // }
+  function handleRemoveFromLibrary() {
+    onRemoveFromLibrary(book);
+  }
 
   return (
     <div className="book-card user-library-card">
@@ -55,6 +54,7 @@ function UserLibraryBookCard({ book }: UserLibraryBookCardProps) {
             type="button"
             aria-label="Remove book from library"
             title="Remove from library"
+            onClick={handleRemoveFromLibrary}
           >
             <span className="trash-icon">🗑️</span>
           </button>

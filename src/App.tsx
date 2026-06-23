@@ -58,7 +58,7 @@ function App() {
   function toggleAddToUserLibrary(book: Book) {
     // remove from library
     if (inUserLibrary(book.id)) {
-      setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
+      removeFromUserLibrary(book);
       return;
     }
     // add to library
@@ -71,6 +71,10 @@ function App() {
       readingStatus: 'to-read',
       dateAdded: new Date()
     }]);
+  }
+
+  function removeFromUserLibrary(book: Book) {
+    setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
   }
 
   return (
@@ -114,6 +118,7 @@ function App() {
                   <UserLibraryBookCard
                     key={book.id}
                     book={book}
+                    onRemoveFromLibrary={removeFromUserLibrary}
                   />
                 ))}
               </div>
