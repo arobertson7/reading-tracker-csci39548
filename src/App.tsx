@@ -16,8 +16,8 @@ function App() {
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
 
   const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
-    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'to-read', dateAdded: new Date() },
-    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', dateAdded: new Date() },
+    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'to-read', rating: 5, dateAdded: new Date() },
+    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', rating: 4, dateAdded: new Date() },
     { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date() },
     { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
   ]);
