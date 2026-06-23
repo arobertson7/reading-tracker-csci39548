@@ -177,3 +177,140 @@
     border-color: #2d6a4f;
   }
 }
+
+/* User Library Action Controls & Rating Badge */
+.library-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: auto;
+  width: 100%;
+}
+
+.status-selector-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.status-select {
+  width: 100%;
+  padding: 0.45rem 1.6rem 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23786d63'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.45rem center;
+  background-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: var(--transition-base);
+}
+
+@media (prefers-color-scheme: dark) {
+  .status-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23b0a59a'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  }
+}
+
+.status-select:hover,
+.status-select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.remove-from-library-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-color: rgba(239, 68, 68, 0.30);
+  color: #dc2626;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-base);
+}
+
+.remove-from-library-btn:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.remove-from-library-btn:active {
+  transform: translateY(0);
+}
+
+@media (prefers-color-scheme: dark) {
+  .remove-from-library-btn {
+    background-color: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+  }
+
+  .remove-from-library-btn:hover {
+    background-color: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  }
+}
+
+/* Rating Badge overlay on cover wrapper */
+.book-rating-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 2;
+  transition: var(--transition-base);
+}
+
+.book-rating-badge .star-icon {
+  color: #f59e0b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .book-rating-badge {
+    background: rgba(28, 26, 24, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f59e0b;
+  }
+}
+
+.book-card:hover .book-rating-badge {
+  transform: scale(1.05);
+}
+
+/* Adjust card min-height to accommodate the library controls elegantly */
+.book-card:has(.library-controls) {
+  min-height: 335px;
+}
