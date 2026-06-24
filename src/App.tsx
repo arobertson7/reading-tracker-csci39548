@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
-import { type Book, type UserLibraryBook } from './Book.tsx'
+import { type Book, type UserLibraryBook, type ReadingStatus } from './Book.tsx'
 import { UserLibraryBookCard } from './UserLibraryBookCard.tsx'
 import { SearchResultBookCard } from './SearchResultBookCard'
 import SearchBar from './SearchBar'
@@ -77,6 +77,17 @@ function App() {
     setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
   }
 
+  function updateBookReadingStatus(bookId: string, newReadingStatus: string) {
+    if (newReadingStatus !== 'to-read' && newReadingStatus !== 'reading' && newReadingStatus !== 'finished') {
+      return; // double check that newReadingStatus is a valid ReadingStatus before changing
+    }
+    setUserLibraryBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === bookId ? {...book, readingStatus: newReadingStatus as ReadingStatus} : book
+      )
+    )
+  }
+
   return (
     <div className="app-container">
       <aside className="sidebar">
@@ -119,6 +130,7 @@ function App() {
                     key={book.id}
                     book={book}
                     onRemoveFromLibrary={removeFromUserLibrary}
+                    onChangeReadingStatus={updateBookReadingStatus}
                   />
                 ))}
               </div>

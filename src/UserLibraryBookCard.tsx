@@ -5,9 +5,10 @@ import './BookCard.css';
 interface UserLibraryBookCardProps {
   book: UserLibraryBook;
   onRemoveFromLibrary: (book: UserLibraryBook) => void;
+  onChangeReadingStatus: (bookId: string, newReadingStatus: string) => void;
 }
 
-function UserLibraryBookCard({ book, onRemoveFromLibrary }: UserLibraryBookCardProps) {
+function UserLibraryBookCard({ book, onRemoveFromLibrary, onChangeReadingStatus }: UserLibraryBookCardProps) {
 
   function handleRemoveFromLibrary() {
     onRemoveFromLibrary(book);
@@ -42,6 +43,7 @@ function UserLibraryBookCard({ book, onRemoveFromLibrary }: UserLibraryBookCardP
               className="status-select"
               defaultValue={book.readingStatus || 'to-read'}
               aria-label="Reading status"
+              onChange={(e) => onChangeReadingStatus(book.id, e.target.value)}
             >
               <option value="to-read">📖 Want to Read</option>
               <option value="reading">⚡ Reading</option>
