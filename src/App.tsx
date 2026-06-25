@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating } from './Book.tsx';
 import { UserLibraryBookCard } from './UserLibraryBookCard.tsx';
 import { SearchResultBookCard } from './SearchResultBookCard';
@@ -13,6 +13,24 @@ import unbearable from './assets/unbearable.jpg'; // temporary for sample book c
 
 function App() {
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      return saved === 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
     { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'finished', rating: 4, dateAdded: new Date() },
@@ -102,6 +120,22 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen w-full md:flex-row md:h-screen md:overflow-hidden bg-[#fcfaf7] dark:bg-[#121110]">
+      <button
+        onClick={() => setDarkMode(!darkMode)}
+        className="fixed top-4 right-4 md:top-6 md:right-8 z-50 p-2.5 rounded-full bg-[#ffffff]/90 dark:bg-[#1a1816]/90 border border-[#e8e2d9] dark:border-[#2e2822] shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 backdrop-blur-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#fef3c7] dark:focus:ring-[#451a03] flex items-center justify-center"
+        aria-label="Toggle dark mode"
+      >
+        {darkMode ? (
+          <svg className="w-5 h-5 text-[#f59e0b] transition-transform duration-500 hover:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5 text-[#b45309] transition-transform duration-500 hover:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        )}
+      </button>
+
       <aside className="bg-[#ffffff] dark:bg-[#1a1816] border-b border-[#e8e2d9] dark:border-[#2e2822] p-6 md:py-10 md:px-7 flex flex-col gap-6 md:gap-10 z-10 md:w-[280px] md:h-full md:border-b-0 md:border-r md:shrink-0">
         <header>
           <h1 className="font-['Lora',_Georgia,_serif] text-[1.8rem] md:text-[2.2rem] font-bold text-[#b45309] dark:text-[#f59e0b] mb-2 tracking-[-0.02em]">
