@@ -13,6 +13,10 @@ import unbearable from './assets/unbearable.jpg'; // temporary for sample book c
 
 function App() {
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
+  const [activeFilter, setActiveFilter] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("Date Added");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
 
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme');
@@ -148,17 +152,15 @@ function App() {
 
         <nav className="flex gap-3 mt-2 md:flex-col md:gap-2 md:mt-4 md:grow">
           <button
-            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${
-              displayMode === "userLibrary" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
-            }`}
+            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${displayMode === "userLibrary" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
+              }`}
             onClick={() => setDisplayMode("userLibrary")}
           >
             <span className="text-[1.1rem]">📚</span> My Library
           </button>
           <button
-            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${
-              displayMode === "searchBooks" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
-            }`}
+            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${displayMode === "searchBooks" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
+              }`}
             onClick={() => setDisplayMode("searchBooks")}
           >
             <span className="text-[1.1rem]">🔍</span> Search Books
@@ -177,6 +179,66 @@ function App() {
           <h2 className="font-['Lora',_Georgia,_serif] text-[1.4rem] font-semibold text-[#2b2520] dark:text-[#f2ebe4] mb-6 relative inline-block after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-10 after:h-[3px] after:bg-[#b45309] dark:after:bg-[#f59e0b] after:rounded-[2px]">
             {displayMode === "userLibrary" ? "My Library" : "Search Results"}
           </h2>
+
+          {/* USER LIBRARY FILTER/SORT BAR */}
+          {displayMode === "userLibrary" && (
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-[#e8e2d9]/60 dark:border-[#2e2822]/60">
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#a39b92] dark:text-[#85796d] mr-1">Filter:</span>
+                {["All", "To Read", "Reading", "Finished"].map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer ${activeFilter === filter
+                        ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 shadow-sm"
+                        : "bg-[#ffffff] dark:bg-[#1a1816] text-[#786d63] dark:text-[#b0a59a] border border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4]"
+                      }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort Dropdown & Order Toggle */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#a39b92] dark:text-[#85796d] mr-1">Sort by:</span>
+                <div className="relative inline-flex items-center bg-[#ffffff] dark:bg-[#1a1816] border border-[#e8e2d9] dark:border-[#2e2822] rounded-lg shadow-sm hover:border-[#b45309]/50 dark:hover:border-[#f59e0b]/50 transition-colors">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none bg-transparent pr-8 pl-3 py-1.5 text-xs md:text-sm font-semibold text-[#786d63] dark:text-[#b0a59a] focus:outline-none cursor-pointer"
+                  >
+                    <option value="Title" className="bg-[#ffffff] dark:bg-[#1a1816]">Title</option>
+                    <option value="Author" className="bg-[#ffffff] dark:bg-[#1a1816]">Author</option>
+                    <option value="Date Added" className="bg-[#ffffff] dark:bg-[#1a1816]">Date Added</option>
+                  </select>
+                  <div className="pointer-events-none absolute right-2.5 flex items-center text-[#786d63] dark:text-[#b0a59a]">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                  className="p-1.5 rounded-lg bg-[#ffffff] dark:bg-[#1a1816] border border-[#e8e2d9] dark:border-[#2e2822] text-[#786d63] dark:text-[#b0a59a] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] cursor-pointer shadow-sm hover:border-[#b45309]/50 dark:hover:border-[#f59e0b]/50 transition-all flex items-center justify-center"
+                  title={sortOrder === "asc" ? "Sort Ascending" : "Sort Descending"}
+                >
+                  {sortOrder === "asc" ? (
+                    <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
 
           {/* USER LIBRARY VIEW */}
           {displayMode === "userLibrary" && (
