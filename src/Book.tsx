@@ -15,4 +15,4 @@ interface UserLibraryBook extends Book {
 type ReadingStatus = 'to-read' | 'reading' | 'finished';
 type BookRating = 1 | 2 | 3 | 4 | 5;
 
-export { type Book, type UserLibraryBook, type ReadingStatus }
+export { type Book, type UserLibraryBook, type ReadingStatus, type BookRating }
