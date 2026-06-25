@@ -41,7 +41,7 @@ function SearchResultBookCard({ book, onToggleAddToLibrary, addedToLibrary }: Se
         >
           {inUserLibrary ? "✓ Added to Library" : "+ Add to Library"}
         </button>
-        
+
       </div>
 
     </div>

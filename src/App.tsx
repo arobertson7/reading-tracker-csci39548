@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { type Book, type UserLibraryBook } from './Book.tsx'
+import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating } from './Book.tsx'
 import { UserLibraryBookCard } from './UserLibraryBookCard.tsx'
 import { SearchResultBookCard } from './SearchResultBookCard'
 import SearchBar from './SearchBar'
@@ -16,7 +16,7 @@ function App() {
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
 
   const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
-    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'to-read', rating: 5, dateAdded: new Date() },
+    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'finished', rating: 4, dateAdded: new Date() },
     { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', rating: 4, dateAdded: new Date() },
     { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date() },
     { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
@@ -27,7 +27,7 @@ function App() {
 
   async function fetchSearchResults(query: string) {
     try {
-      const url = OPEN_LIBRARY_URL + query + "&limit=40";
+      const url = OPEN_LIBRARY_URL + query + "&limit=10";
       const response = await fetch(url);
       const data = await response.json();
 
@@ -56,12 +56,14 @@ function App() {
   }
 
   function toggleAddToUserLibrary(book: Book) {
-    // remove from library
-    if (inUserLibrary(book.id)) {
-      setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
-      return;
+    if (inUserLibrary(book.id)) { // remove from library
+      removeFromUserLibrary(book);
+    } else { // else add to library
+      addToUserLibrary(book);
     }
-    // add to library
+  }
+
+  function addToUserLibrary(book: Book) {
     setUserLibraryBooks([...userLibraryBooks, {
       id: book.id,
       title: book.title,
@@ -71,6 +73,32 @@ function App() {
       readingStatus: 'to-read',
       dateAdded: new Date()
     }]);
+  }
+
+  function removeFromUserLibrary(book: Book) {
+    setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
+  }
+
+  function updateBookReadingStatus(bookId: string, newReadingStatus: string) {
+    if (newReadingStatus !== 'to-read' && newReadingStatus !== 'reading' && newReadingStatus !== 'finished') {
+      return; // double check that newReadingStatus is a valid ReadingStatus before changing
+    }
+    setUserLibraryBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === bookId ? {
+          ...book, readingStatus: newReadingStatus as ReadingStatus,
+          rating: undefined // any change in reading status would logically reset the rating
+        } : book
+      )
+    )
+  }
+
+  function updateBookRating(bookId: string, rating: number) {
+    setUserLibraryBooks((prevBooks) =>
+      prevBooks.map((book) =>
+        book.id === bookId ? { ...book, rating: rating as BookRating } : book
+      )
+    )
   }
 
   return (
@@ -110,29 +138,32 @@ function App() {
           {/* USER LIBRARY VIEW */}
           {displayMode === "userLibrary"
             && <div className='book-grid'>
-                {userLibraryBooks.map((book) => (
-                  <UserLibraryBookCard
-                    key={book.id}
-                    book={book}
-                  />
-                ))}
-              </div>
+              {userLibraryBooks.map((book) => (
+                <UserLibraryBookCard
+                  key={book.id}
+                  book={book}
+                  onRemoveFromLibrary={removeFromUserLibrary}
+                  onChangeReadingStatus={updateBookReadingStatus}
+                  onChangeRating={updateBookRating}
+                />
+              ))}
+            </div>
           }
           {/* SEARCH BOOKS VIEW */}
           {displayMode === "searchBooks"
             && <div className='book-grid'>
-                {searchResultBooks.map((book) => (
-                  <SearchResultBookCard
-                    key={book.id}
-                    book={book}
-                    onToggleAddToLibrary={toggleAddToUserLibrary}
-                    addedToLibrary={inUserLibrary(book.id)}
-                  />
-                ))}
-              </div>
+              {searchResultBooks.map((book) => (
+                <SearchResultBookCard
+                  key={book.id}
+                  book={book}
+                  onToggleAddToLibrary={toggleAddToUserLibrary}
+                  addedToLibrary={inUserLibrary(book.id)}
+                />
+              ))}
+            </div>
           }
         </section>
-        
+
       </main>
 
       <footer className="mobile-footer">
