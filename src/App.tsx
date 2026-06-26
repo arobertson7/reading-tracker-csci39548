@@ -5,6 +5,7 @@ import { SearchResultBookCard } from './SearchResultBookCard';
 import SearchBar from './SearchBar';
 import { type OpenLibraryBook } from './OpenLibraryBook';
 import noBookCover from './assets/no-cover.png';
+import { getFilterEmptyStateInfo } from './helpers.tsx'
 
 import oneFishTwoFish from './assets/one-fish-two-fish.jpg'; // temporary for sample book cover
 import breakfastOfCHampions from './assets/breakfast-of-champions.jpg'; // temporary for sample book cover
@@ -43,6 +44,10 @@ function App() {
     { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
   ]);
   const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
+
+  const filteredLibraryBooks = userLibraryBooks.filter((book) => (
+    activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
+  ));
 
   const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
@@ -146,7 +151,7 @@ function App() {
             Reading Tracker
           </h1>
           <p className="text-[0.85rem] text-[#786d63] dark:text-[#b0a59a] leading-[1.4]">
-            A book a day keeps the... Wait. <br />A book a day? That's like a lot of time spent reading.
+            A book a day keeps the... Wait. <br />A book a day? That's like a lot of reading.
           </p>
         </header>
 
@@ -181,7 +186,7 @@ function App() {
           </h2>
 
           {/* USER LIBRARY FILTER/SORT BAR */}
-          {displayMode === "userLibrary" && (
+          {displayMode === "userLibrary" && userLibraryBooks.length > 0 && (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-[#e8e2d9]/60 dark:border-[#2e2822]/60">
               {/* Filter Buttons */}
               <div className="flex flex-wrap items-center gap-2">
@@ -191,8 +196,8 @@ function App() {
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
                     className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer ${activeFilter === filter
-                        ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 shadow-sm"
-                        : "bg-[#ffffff] dark:bg-[#1a1816] text-[#786d63] dark:text-[#b0a59a] border border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4]"
+                      ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 shadow-sm"
+                      : "bg-[#ffffff] dark:bg-[#1a1816] text-[#786d63] dark:text-[#b0a59a] border border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4]"
                       }`}
                   >
                     {filter}
@@ -242,30 +247,70 @@ function App() {
 
           {/* USER LIBRARY VIEW */}
           {displayMode === "userLibrary" && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
-              {userLibraryBooks
-                .filter((book) => (
-                  activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
-                ))
-                .toSorted((a: UserLibraryBook, b: UserLibraryBook) => {
-                  let valA = (sortBy === "Date Added") ? a.dateAdded : (sortBy === "Title" ? a.title.toLowerCase() : a.author.toLowerCase())
-                  let valB = (sortBy === "Date Added") ? b.dateAdded : (sortBy === "Title" ? b.title.toLowerCase() : b.author.toLowerCase())
+            userLibraryBooks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed border-[#e8e2d9] dark:border-[#2e2822] rounded-2xl bg-[#ffffff] dark:bg-[#1a1816] max-w-md mx-auto my-4 shadow-[0_4px_12px_rgba(43,37,32,0.02)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:border-[#b45309]/40 dark:hover:border-[#f59e0b]/40">
+                <div className="w-16 h-16 rounded-full bg-[#fef3c7] dark:bg-[#451a03] flex items-center justify-center text-3xl mb-5 shadow-inner">
+                  <span className="animate-pulse">📚</span>
+                </div>
+                <h3 className="font-['Lora',_Georgia,_serif] text-xl font-bold text-[#2b2520] dark:text-[#f2ebe4] mb-2">
+                  Your Library is Empty
+                </h3>
+                <p className="text-sm text-[#786d63] dark:text-[#b0a59a] mb-6 max-w-[280px] leading-relaxed">
+                  Add books to your collection!
+                </p>
+                <button
+                  onClick={() => setDisplayMode("searchBooks")}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#b45309] dark:bg-[#f59e0b] text-[#ffffff] dark:text-[#121110] font-semibold text-xs md:text-sm shadow-md hover:bg-[#92400e] dark:hover:bg-[#d97706] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#fef3c7]"
+                >
+                  <span>🔍</span> Search Books
+                </button>
+              </div>
+            ) : filteredLibraryBooks.length === 0 ? (
+              (() => {
+                const filterInfo = getFilterEmptyStateInfo(activeFilter);
+                return (
+                  <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed border-[#e8e2d9] dark:border-[#2e2822] rounded-2xl bg-[#ffffff] dark:bg-[#1a1816] max-w-md mx-auto my-4 shadow-[0_4px_12px_rgba(43,37,32,0.02)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:border-[#b45309]/40 dark:hover:border-[#f59e0b]/40">
+                    <div className="w-16 h-16 rounded-full bg-[#fef3c7] dark:bg-[#451a03] flex items-center justify-center text-3xl mb-5 shadow-inner">
+                      <span>{filterInfo.icon}</span>
+                    </div>
+                    <h3 className="font-['Lora',_Georgia,_serif] text-xl font-bold text-[#2b2520] dark:text-[#f2ebe4] mb-2">
+                      {filterInfo.title}
+                    </h3>
+                    <p className="text-sm text-[#786d63] dark:text-[#b0a59a] mb-6 max-w-[280px] leading-relaxed">
+                      {filterInfo.description}
+                    </p>
+                    <button
+                      onClick={() => setActiveFilter("All")}
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#ffffff] dark:bg-[#1a1816] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 font-semibold text-xs md:text-sm shadow-sm hover:bg-[#fef3c7] dark:hover:bg-[#451a03] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#fef3c7]"
+                    >
+                      Show All Books
+                    </button>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
+                {filteredLibraryBooks
+                  .toSorted((a: UserLibraryBook, b: UserLibraryBook) => {
+                    let valA = (sortBy === "Date Added") ? a.dateAdded : (sortBy === "Title" ? a.title.toLowerCase() : a.author.toLowerCase())
+                    let valB = (sortBy === "Date Added") ? b.dateAdded : (sortBy === "Title" ? b.title.toLowerCase() : b.author.toLowerCase())
 
-                  if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-                  if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+                    if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
 
-                  return 0;
-                })
-                .map((book) => (
-                  <UserLibraryBookCard
-                    key={book.id}
-                    book={book}
-                    onRemoveFromLibrary={removeFromUserLibrary}
-                    onChangeReadingStatus={updateBookReadingStatus}
-                    onChangeRating={updateBookRating}
-                  />
-                ))}
-            </div>
+                    return 0;
+                  })
+                  .map((book) => (
+                    <UserLibraryBookCard
+                      key={book.id}
+                      book={book}
+                      onRemoveFromLibrary={removeFromUserLibrary}
+                      onChangeReadingStatus={updateBookReadingStatus}
+                      onChangeRating={updateBookRating}
+                    />
+                  ))}
+              </div>
+            )
           )}
 
           {/* SEARCH BOOKS VIEW */}
