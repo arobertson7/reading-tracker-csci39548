@@ -7,17 +7,26 @@ import { type OpenLibraryBook } from './OpenLibraryBook';
 import noBookCover from './assets/no-cover.png';
 import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx'
 
-import oneFishTwoFish from './assets/one-fish-two-fish.jpg'; // temporary for sample book cover
-import breakfastOfCHampions from './assets/breakfast-of-champions.jpg'; // temporary for sample book cover
-import greenwichPark from './assets/greenwich-park.jpg'; // temporary for sample book cover
-import unbearable from './assets/unbearable.jpg'; // temporary for sample book cover
+const STORAGE_KEY = "user_library_books";
+const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
 function App() {
+  const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>(() => {
+    // Load user's library if it exists in local storage
+    const raw_library_books = localStorage.getItem(STORAGE_KEY);
+    if (!raw_library_books) return [];
+    try {
+      return JSON.parse(raw_library_books) as UserLibraryBook[];
+    } catch {
+      return [];
+    }
+  });
+
+  const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string>("Date Added");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-
 
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('theme');
@@ -37,23 +46,18 @@ function App() {
     }
   }, [darkMode]);
 
-  const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
-    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'finished', rating: 4, dateAdded: new Date("2026-04-25") },
-    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', rating: 4, dateAdded: new Date("2026-05-20") },
-    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date("2026-06-14") },
-    { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
-  ]);
-  const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
+  // Save user's library to localStorage when there is a change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(userLibraryBooks));
+  }, [userLibraryBooks]);
 
   const filteredLibraryBooks = userLibraryBooks.filter((book) => (
     activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
   ));
 
-  const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
-
   async function fetchSearchResults(query: string) {
     try {
-      const url = OPEN_LIBRARY_URL + query + "&limit=10";
+      const url = OPEN_LIBRARY_URL + query + "&limit=20";
       const response = await fetch(url);
       const data = await response.json();
 
@@ -206,7 +210,7 @@ function App() {
                         : userLibraryBooks.filter((book) => book.readingStatus === filter.toLowerCase().split(' ').join('-')).length
                       })
                     </span>
-                    {filter === "Finished" && userLibraryBooks.filter((book) => book.readingStatus === 'finished').length > 0 && (
+                    {filter === "Finished" && userLibraryBooks.filter((book) => book.rating).length > 0 && (
                       <span className={`ml-1.5 text-[10px] md:text-xs font-medium ${activeFilter === "Finished"
                         ? "text-[#b45309]/75 dark:text-[#f59e0b]/75"
                         : "text-[#786d63]/70 dark:text-[#b0a59a]/70"
