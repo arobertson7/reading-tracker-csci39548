@@ -1,3 +1,5 @@
+import type { UserLibraryBook } from "./Book";
+
 function getFilterEmptyStateInfo(filter: string) {
   switch (filter) {
     case "To Read":
@@ -27,4 +29,15 @@ function getFilterEmptyStateInfo(filter: string) {
   }
 };
 
-export { getFilterEmptyStateInfo };
+function getAverageBookRating(books: UserLibraryBook[]) {
+  const rated_books = books.filter((book) => book.rating)
+  const avg_rating = (
+    rated_books.reduce((acc, book) => {
+      return book.rating ? acc + book.rating : 0
+    }, 0)
+  ) / rated_books.length
+
+  return avg_rating.toFixed(1)
+}
+
+export { getFilterEmptyStateInfo, getAverageBookRating };
