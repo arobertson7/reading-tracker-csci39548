@@ -37,6 +37,7 @@ function SearchBar({ onSearch }: SearchBarProps) {
           name="search-books"
           id="search-books-input"
           className="w-full py-3 px-4 rounded-lg border border-[#e8e2d9] dark:border-[#2e2822] bg-[#fcfaf7] dark:bg-[#121110] text-[#2b2520] dark:text-[#f2ebe4] font-inherit text-[0.95rem] outline-none transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] focus:border-[#b45309] dark:focus:border-[#f59e0b] focus:ring-[3px] focus:ring-[#fef3c7] dark:focus:ring-[#451a03]"
+          value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           placeholder="The Stranger by Albert Camus..."
         />
