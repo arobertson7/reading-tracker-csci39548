@@ -23,6 +23,11 @@ function App() {
   });
 
   const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
+  const [fetchingSearchResults, setFetchingSearchResults] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [mostRecentSearch, setMostRecentSearch] = useState<string>("");
+  const [searchError, setSearchError] = useState<string | null>(null);
+
   const [displayMode, setDisplayMode] = useState<string>("userLibrary"); // "userLibrary" or "searchBooks"
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string>("Date Added");
@@ -56,9 +61,15 @@ function App() {
   ));
 
   async function fetchSearchResults(query: string) {
+    setHasSearched(true);
+    setFetchingSearchResults(true);
+    setSearchError(null);
     try {
       const url = OPEN_LIBRARY_URL + query + "&limit=20";
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
 
       const book_results = data.docs as OpenLibraryBook[];
@@ -69,12 +80,15 @@ function App() {
         year_published: book_data.first_publish_year,
         cover_url: book_data.cover_i ? `https://covers.openlibrary.org/b/id/${book_data.cover_i}-M.jpg` : noBookCover
       }));
-
       setSearchResultBooks(updatedsearchResultBooks);
 
     } catch (error) {
       console.error("Error fetching library results:", error);
       setSearchResultBooks([]);
+      setSearchError("Unable to fetch search results. Please check your network connection or try again.");
+    } finally {
+      setFetchingSearchResults(false);
+      setMostRecentSearch(query);
     }
   }
 
@@ -186,7 +200,25 @@ function App() {
 
         <section>
           <h2 className="font-['Lora',_Georgia,_serif] text-[1.4rem] font-semibold text-[#2b2520] dark:text-[#f2ebe4] mb-6 relative inline-block after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-10 after:h-[3px] after:bg-[#b45309] dark:after:bg-[#f59e0b] after:rounded-[2px]">
-            {displayMode === "userLibrary" ? "My Library" : "Search Results"}
+            {displayMode === "userLibrary" ? (
+              "My Library"
+            ) : !hasSearched ? (
+              "Discover Books"
+            ) : fetchingSearchResults ? (
+              "Searching..."
+            ) : (
+              <>
+                Search Results
+                {mostRecentSearch && (
+                  <>
+                    {" for "}
+                    <span className="text-[#b45309] dark:text-[#f59e0b] italic font-serif font-bold">
+                      "{decodeURIComponent(mostRecentSearch)}"
+                    </span>
+                  </>
+                )}
+              </>
+            )}
           </h2>
 
           {/* USER LIBRARY FILTER/SORT BAR */}
@@ -332,16 +364,65 @@ function App() {
 
           {/* SEARCH BOOKS VIEW */}
           {displayMode === "searchBooks" && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
-              {searchResultBooks.map((book) => (
-                <SearchResultBookCard
-                  key={book.id}
-                  book={book}
-                  onToggleAddToLibrary={toggleAddToUserLibrary}
-                  addedToLibrary={inUserLibrary(book.id)}
-                />
-              ))}
-            </div>
+            !hasSearched ? (
+              <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed border-[#e8e2d9] dark:border-[#2e2822] rounded-2xl bg-[#ffffff] dark:bg-[#1a1816] max-w-lg mx-auto my-4 shadow-[0_4px_12px_rgba(43,37,32,0.02)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:border-[#b45309]/40 dark:hover:border-[#f59e0b]/40">
+                <div className="w-16 h-16 rounded-full bg-[#fef3c7] dark:bg-[#451a03] flex items-center justify-center text-3xl mb-5 shadow-inner">
+                  <span className="animate-bounce">🔍</span>
+                </div>
+                <h3 className="font-['Lora',_Georgia,_serif] text-xl font-bold text-[#2b2520] dark:text-[#f2ebe4] mb-2">
+                  Discover New Books
+                </h3>
+                <p className="text-sm text-[#786d63] dark:text-[#b0a59a] max-w-sm leading-relaxed">
+                  Search by title, author, or subject to find books and add them to your reading library.
+                </p>
+              </div>
+            ) : fetchingSearchResults ? (
+              <div className="flex flex-col items-center justify-center py-20 w-full">
+                <div className="w-12 h-12 border-4 border-[#e8e2d9] dark:border-[#2e2822] border-t-[#b45309] dark:border-t-[#f59e0b] rounded-full animate-spin mb-4"></div>
+                <p className="text-sm font-semibold text-[#786d63] dark:text-[#b0a59a] animate-pulse">Fetching books from Open Library...</p>
+              </div>
+            ) : searchError ? (
+              <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed border-[#fecaca] dark:border-[#450a0a] rounded-2xl bg-[#ffffff] dark:bg-[#1a1816] max-w-md mx-auto my-4 shadow-[0_4px_12px_rgba(43,37,32,0.02)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:border-[#ef4444]/40">
+                <div className="w-16 h-16 rounded-full bg-[#fee2e2] dark:bg-[#7f1d1d] flex items-center justify-center text-3xl mb-5 shadow-inner">
+                  <span>⚠️</span>
+                </div>
+                <h3 className="font-['Lora',_Georgia,_serif] text-xl font-bold text-[#b91c1c] dark:text-[#f87171] mb-2">
+                  Search Failed
+                </h3>
+                <p className="text-sm text-[#786d63] dark:text-[#b0a59a] mb-6 max-w-[280px] leading-relaxed">
+                  {searchError}
+                </p>
+                <button
+                  onClick={() => fetchSearchResults(mostRecentSearch)}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#ef4444] dark:bg-[#dc2626] text-[#ffffff] font-semibold text-xs md:text-sm shadow-md hover:bg-[#dc2626] dark:hover:bg-[#b91c1c] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#fee2e2]"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : searchResultBooks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed border-[#e8e2d9] dark:border-[#2e2822] rounded-2xl bg-[#ffffff] dark:bg-[#1a1816] max-w-md mx-auto my-4 shadow-[0_4px_12px_rgba(43,37,32,0.02)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition-all duration-300 hover:border-[#b45309]/40 dark:hover:border-[#f59e0b]/40">
+                <div className="w-16 h-16 rounded-full bg-[#fef3c7] dark:bg-[#451a03] flex items-center justify-center text-3xl mb-5 shadow-inner">
+                  <span>🧐</span>
+                </div>
+                <h3 className="font-['Lora',_Georgia,_serif] text-xl font-bold text-[#2b2520] dark:text-[#f2ebe4] mb-2">
+                  No Results Found
+                </h3>
+                <p className="text-sm text-[#786d63] dark:text-[#b0a59a] max-w-[280px] leading-relaxed">
+                  We couldn't find any books matching your search query. Try checking your spelling or using different keywords.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
+                {searchResultBooks.map((book) => (
+                  <SearchResultBookCard
+                    key={book.id}
+                    book={book}
+                    onToggleAddToLibrary={toggleAddToUserLibrary}
+                    addedToLibrary={inUserLibrary(book.id)}
+                  />
+                ))}
+              </div>
+            )
           )}
         </section>
       </main>
