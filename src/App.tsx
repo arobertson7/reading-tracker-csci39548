@@ -5,7 +5,7 @@ import { SearchResultBookCard } from './SearchResultBookCard';
 import SearchBar from './SearchBar';
 import { type OpenLibraryBook } from './OpenLibraryBook';
 import noBookCover from './assets/no-cover.png';
-import { getFilterEmptyStateInfo } from './helpers.tsx'
+import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx'
 
 import oneFishTwoFish from './assets/one-fish-two-fish.jpg'; // temporary for sample book cover
 import breakfastOfCHampions from './assets/breakfast-of-champions.jpg'; // temporary for sample book cover
@@ -195,12 +195,25 @@ function App() {
                   <button
                     key={filter}
                     onClick={() => setActiveFilter(filter)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer ${activeFilter === filter
+                    className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer inline-flex items-center ${activeFilter === filter
                       ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 shadow-sm"
                       : "bg-[#ffffff] dark:bg-[#1a1816] text-[#786d63] dark:text-[#b0a59a] border border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4]"
                       }`}
                   >
-                    {filter}
+                    <span>
+                      {filter} ({filter === "All"
+                        ? userLibraryBooks.length
+                        : userLibraryBooks.filter((book) => book.readingStatus === filter.toLowerCase().split(' ').join('-')).length
+                      })
+                    </span>
+                    {filter === "Finished" && userLibraryBooks.filter((book) => book.readingStatus === 'finished').length > 0 && (
+                      <span className={`ml-1.5 text-[10px] md:text-xs font-medium ${activeFilter === "Finished"
+                        ? "text-[#b45309]/75 dark:text-[#f59e0b]/75"
+                        : "text-[#786d63]/70 dark:text-[#b0a59a]/70"
+                        }`}>
+                        Avg <span className="text-[#d97706] dark:text-[#fbbf24]">★</span>{getAverageBookRating(userLibraryBooks)}
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>
