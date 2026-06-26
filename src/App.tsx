@@ -37,9 +37,9 @@ function App() {
   }, [darkMode]);
 
   const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>([
-    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'finished', rating: 4, dateAdded: new Date() },
-    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', rating: 4, dateAdded: new Date() },
-    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date() },
+    { id: "1", title: "One Fish, Two Fish, Red Fish, Blue Fish", author: "Dr. Seuss", year_published: 1960, cover_url: oneFishTwoFish, readingStatus: 'finished', rating: 4, dateAdded: new Date("2026-04-25") },
+    { id: "2", title: "Breakfast of Champions", author: "Kurt Vonnegut", year_published: 1973, cover_url: breakfastOfCHampions, readingStatus: 'to-read', rating: 4, dateAdded: new Date("2026-05-20") },
+    { id: "3", title: "Greenwich Park", author: "Katherine Faulkner", year_published: 2021, cover_url: greenwichPark, readingStatus: 'to-read', dateAdded: new Date("2026-06-14") },
     { id: "4", title: "The Unbearable Lightness of Being", author: "Milan Kundera", year_published: 1984, cover_url: unbearable, readingStatus: 'to-read', dateAdded: new Date() }
   ]);
   const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
@@ -243,15 +243,28 @@ function App() {
           {/* USER LIBRARY VIEW */}
           {displayMode === "userLibrary" && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
-              {userLibraryBooks.map((book) => (
-                <UserLibraryBookCard
-                  key={book.id}
-                  book={book}
-                  onRemoveFromLibrary={removeFromUserLibrary}
-                  onChangeReadingStatus={updateBookReadingStatus}
-                  onChangeRating={updateBookRating}
-                />
-              ))}
+              {userLibraryBooks
+                .filter((book) => (
+                  activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
+                ))
+                .toSorted((a: UserLibraryBook, b: UserLibraryBook) => {
+                  let valA = (sortBy === "Date Added") ? a.dateAdded : (sortBy === "Title" ? a.title.toLowerCase() : a.author.toLowerCase())
+                  let valB = (sortBy === "Date Added") ? b.dateAdded : (sortBy === "Title" ? b.title.toLowerCase() : b.author.toLowerCase())
+
+                  if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+                  if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+
+                  return 0;
+                })
+                .map((book) => (
+                  <UserLibraryBookCard
+                    key={book.id}
+                    book={book}
+                    onRemoveFromLibrary={removeFromUserLibrary}
+                    onChangeReadingStatus={updateBookReadingStatus}
+                    onChangeRating={updateBookRating}
+                  />
+                ))}
             </div>
           )}
 
