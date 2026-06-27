@@ -7,6 +7,7 @@ import { type OpenLibraryBook } from './OpenLibraryBook';
 import noBookCover from './assets/no-cover.png';
 import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx'
 import { useLibraryBooks } from './hooks/useLibraryBooks.tsx';
+import { useDarkMode } from './hooks/useDarkMode.tsx';
 
 const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
@@ -24,23 +25,7 @@ export default function App() {
   const [sortBy, setSortBy] = useState<string>("Date Added");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-      return saved === 'dark';
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [darkMode]);
+  const { darkMode, setDarkMode } = useDarkMode();
 
 
   const filteredAndSortedLibraryBooks = userLibraryBooks
