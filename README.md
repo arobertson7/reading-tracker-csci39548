@@ -1,73 +1,12 @@
-# React + TypeScript + Vite
+# Reading Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to my Reading Tracker web application! This project was built to demonstrate component-driven state management, real-time API integrations, custom hooks, and dynamic list processing.
 
-Currently, two official plugins are available:
+This is a clean, single-page reading application featuring:
+- **API Search Integration:** Asynchronously queries and fetches book titles, authors, publication years, and cover artwork from the public Open Library API in real time.
+- **Status & Rating Workflows:** Organizes books by "To Read", "Reading", and "Finished" statuses, enabling an interactive 1-to-5 star rating popover for finished books.
+- **Dynamic Filtering & Sorting:** Updates library lists instantly via reading status filters and sorting controls (by title, author, or date added) with live average rating calculations.
+- **Polished Empty States:** Displays responsive, contextual empty-state panels with illustrations and actions for empty libraries, unmatched filters, and search errors.
+- **Persistent State:** Saves and retrieves the user's book collection and ratings locally using browser `localStorage` to preserve library records across sessions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+It is built using React, Vite, TypeScript, and Tailwind CSS (featuring a warm-toned dark/light mode toggle with custom transition animations).
