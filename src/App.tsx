@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react';
-import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating } from './Book.tsx';
-import { UserLibraryBookCard } from './UserLibraryBookCard.tsx';
-import { SearchResultBookCard } from './SearchResultBookCard';
-import SearchBar from './SearchBar';
-import { type OpenLibraryBook } from './OpenLibraryBook';
+import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating, type OpenLibraryBook } from './types.ts';
+import { UserLibraryBookCard } from './components/UserLibraryBookCard.tsx';
+import { SearchResultBookCard } from './components/SearchResultBookCard';
+import SearchBar from './components/SearchBar';
 import noBookCover from './assets/no-cover.png';
-import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx'
+import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx';
+import { useLibraryBooks } from './hooks/useLibraryBooks.tsx';
+import { useDarkMode } from './hooks/useDarkMode.tsx';
+import SideBar from './components/SideBar.tsx';
+import DarkModeToggleButton from './components/DarkModeToggleButton.tsx';
+import FilterAndSortBar from './components/FilterAndSortBar.tsx';
 
-const STORAGE_KEY = "user_library_books";
 const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
-function App() {
-  const [userLibraryBooks, setUserLibraryBooks] = useState<UserLibraryBook[]>(() => {
-    // Load user's library if it exists in local storage
-    const raw_library_books = localStorage.getItem(STORAGE_KEY);
-    if (!raw_library_books) return [];
-    try {
-      return JSON.parse(raw_library_books) as UserLibraryBook[];
-    } catch {
-      return [];
-    }
-  });
+export default function App() {
+  const { userLibraryBooks, inUserLibrary, removeFromUserLibrary, toggleAddToUserLibrary, updateBookReadingStatus, updateBookRating} = useLibraryBooks();
 
   const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
   const [fetchingSearchResults, setFetchingSearchResults] = useState<boolean>(false);
@@ -33,32 +27,25 @@ function App() {
   const [sortBy, setSortBy] = useState<string>("Date Added");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) {
-      return saved === 'dark';
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  const { darkMode, setDarkMode } = useDarkMode();
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [darkMode]);
 
-  // Save user's library to localStorage when there is a change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userLibraryBooks));
-  }, [userLibraryBooks]);
+  const filteredAndSortedLibraryBooks = userLibraryBooks
+    .filter((book) => (
+      activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
+    ))
+    .toSorted((a: UserLibraryBook, b: UserLibraryBook) => {
+      let valA = (sortBy === "Date Added") ? a.dateAdded : (sortBy === "Title" ? a.title.toLowerCase() : a.author.toLowerCase())
+      let valB = (sortBy === "Date Added") ? b.dateAdded : (sortBy === "Title" ? b.title.toLowerCase() : b.author.toLowerCase())
 
-  const filteredLibraryBooks = userLibraryBooks.filter((book) => (
-    activeFilter === "All" || book.readingStatus === activeFilter.toLowerCase().split(' ').join('-')
-  ));
+      if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+      if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+
+      return 0;
+    });
+
+  const averageBookRating = getAverageBookRating(userLibraryBooks);
+
 
   async function fetchSearchResults(query: string) {
     setHasSearched(true);
@@ -92,108 +79,17 @@ function App() {
     }
   }
 
-  function inUserLibrary(bookId: string) {
-    for (const userLibraryBook of userLibraryBooks) {
-      if (userLibraryBook.id === bookId) return true;
-    }
-    return false;
-  }
-
-  function toggleAddToUserLibrary(book: Book) {
-    if (inUserLibrary(book.id)) { // remove from library
-      removeFromUserLibrary(book);
-    } else { // else add to library
-      addToUserLibrary(book);
-    }
-  }
-
-  function addToUserLibrary(book: Book) {
-    setUserLibraryBooks([...userLibraryBooks, {
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      year_published: book.year_published,
-      cover_url: book.cover_url,
-      readingStatus: 'to-read',
-      dateAdded: new Date()
-    }]);
-  }
-
-  function removeFromUserLibrary(book: Book) {
-    setUserLibraryBooks(userLibraryBooks.filter((userLibraryBook) => userLibraryBook.id !== book.id));
-  }
-
-  function updateBookReadingStatus(bookId: string, newReadingStatus: string) {
-    if (newReadingStatus !== 'to-read' && newReadingStatus !== 'reading' && newReadingStatus !== 'finished') {
-      return; // double check that newReadingStatus is a valid ReadingStatus before changing
-    }
-    setUserLibraryBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book.id === bookId ? {
-          ...book, readingStatus: newReadingStatus as ReadingStatus,
-          rating: undefined // any change in reading status would logically reset the rating
-        } : book
-      )
-    )
-  }
-
-  function updateBookRating(bookId: string, rating: number) {
-    setUserLibraryBooks((prevBooks) =>
-      prevBooks.map((book) =>
-        book.id === bookId ? { ...book, rating: rating as BookRating } : book
-      )
-    )
-  }
-
   return (
     <div className="flex flex-col min-h-screen w-full md:flex-row md:h-screen md:overflow-hidden bg-[#fcfaf7] dark:bg-[#121110]">
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className="fixed top-4 right-4 md:top-6 md:right-8 z-50 p-2.5 rounded-full bg-[#ffffff]/90 dark:bg-[#1a1816]/90 border border-[#e8e2d9] dark:border-[#2e2822] shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-300 backdrop-blur-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#fef3c7] dark:focus:ring-[#451a03] flex items-center justify-center"
-        aria-label="Toggle dark mode"
-      >
-        {darkMode ? (
-          <svg className="w-5 h-5 text-[#f59e0b] transition-transform duration-500 hover:rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5 text-[#b45309] transition-transform duration-500 hover:-rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
-        )}
-      </button>
+      <DarkModeToggleButton
+        isDarkMode={darkMode}
+        onToggle={setDarkMode}
+      />
 
-      <aside className="bg-[#ffffff] dark:bg-[#1a1816] border-b border-[#e8e2d9] dark:border-[#2e2822] p-6 md:py-10 md:px-7 flex flex-col gap-6 md:gap-10 z-10 md:w-[280px] md:h-full md:border-b-0 md:border-r md:shrink-0">
-        <header>
-          <h1 className="font-['Lora',_Georgia,_serif] text-[1.8rem] md:text-[2.2rem] font-bold text-[#b45309] dark:text-[#f59e0b] mb-2 tracking-[-0.02em]">
-            Reading Tracker
-          </h1>
-          <p className="text-[0.85rem] text-[#786d63] dark:text-[#b0a59a] leading-[1.4]">
-            A book a day keeps the... Wait. <br />A book a day? That's like a lot of reading.
-          </p>
-        </header>
-
-        <nav className="flex gap-3 mt-2 md:flex-col md:gap-2 md:mt-4 md:grow">
-          <button
-            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${displayMode === "userLibrary" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
-              }`}
-            onClick={() => setDisplayMode("userLibrary")}
-          >
-            <span className="text-[1.1rem]">📚</span> My Library
-          </button>
-          <button
-            className={`flex items-center gap-2 py-[0.6rem] px-4 md:py-3 md:px-4 rounded-lg bg-transparent border border-transparent text-[#786d63] dark:text-[#b0a59a] text-[0.9rem] font-semibold cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] md:w-full ${displayMode === "searchBooks" ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822]" : ""
-              }`}
-            onClick={() => setDisplayMode("searchBooks")}
-          >
-            <span className="text-[1.1rem]">🔍</span> Search Books
-          </button>
-        </nav>
-
-        <footer className="hidden md:block md:mt-auto md:text-[0.75rem] md:text-[#a39b92] dark:text-[#85796d] md:leading-[1.5] md:border-t md:border-[#e8e2d9] dark:border-[#2e2822] pt-5">
-          <p>&copy;2026 Austin Robertson <br /> Brooklyn, NY</p>
-        </footer>
-      </aside>
+      <SideBar
+        displayMode={displayMode}
+        onClickDisplayMode={setDisplayMode}
+      />
 
       <main className="flex-1 p-6 md:py-12 md:px-16 flex flex-col gap-8 md:gap-10 max-w-full md:h-full md:overflow-y-auto">
         {displayMode === "searchBooks" && <SearchBar onSearch={fetchSearchResults} />}
@@ -222,76 +118,18 @@ function App() {
           </h2>
 
           {/* USER LIBRARY FILTER/SORT BAR */}
-          {displayMode === "userLibrary" && userLibraryBooks.length > 0 && (
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 pb-4 border-b border-[#e8e2d9]/60 dark:border-[#2e2822]/60">
-              {/* Filter Buttons */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#a39b92] dark:text-[#85796d] mr-1">Filter:</span>
-                {["All", "To Read", "Reading", "Finished"].map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer inline-flex items-center ${activeFilter === filter
-                      ? "bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border border-[#b45309]/30 dark:border-[#f59e0b]/30 shadow-sm"
-                      : "bg-[#ffffff] dark:bg-[#1a1816] text-[#786d63] dark:text-[#b0a59a] border border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4]"
-                      }`}
-                  >
-                    <span>
-                      {filter} ({filter === "All"
-                        ? userLibraryBooks.length
-                        : userLibraryBooks.filter((book) => book.readingStatus === filter.toLowerCase().split(' ').join('-')).length
-                      })
-                    </span>
-                    {filter === "Finished" && userLibraryBooks.filter((book) => book.rating).length > 0 && (
-                      <span className={`ml-1.5 text-[10px] md:text-xs font-medium ${activeFilter === "Finished"
-                        ? "text-[#b45309]/75 dark:text-[#f59e0b]/75"
-                        : "text-[#786d63]/70 dark:text-[#b0a59a]/70"
-                        }`}>
-                        Avg <span className="text-[#d97706] dark:text-[#fbbf24]">★</span>{getAverageBookRating(userLibraryBooks)}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Sort Dropdown & Order Toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#a39b92] dark:text-[#85796d] mr-1">Sort by:</span>
-                <div className="relative inline-flex items-center bg-[#ffffff] dark:bg-[#1a1816] border border-[#e8e2d9] dark:border-[#2e2822] rounded-lg shadow-sm hover:border-[#b45309]/50 dark:hover:border-[#f59e0b]/50 transition-colors">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-transparent pr-8 pl-3 py-1.5 text-xs md:text-sm font-semibold text-[#786d63] dark:text-[#b0a59a] focus:outline-none cursor-pointer"
-                  >
-                    <option value="Title" className="bg-[#ffffff] dark:bg-[#1a1816]">Title</option>
-                    <option value="Author" className="bg-[#ffffff] dark:bg-[#1a1816]">Author</option>
-                    <option value="Date Added" className="bg-[#ffffff] dark:bg-[#1a1816]">Date Added</option>
-                  </select>
-                  <div className="pointer-events-none absolute right-2.5 flex items-center text-[#786d63] dark:text-[#b0a59a]">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                  className="p-1.5 rounded-lg bg-[#ffffff] dark:bg-[#1a1816] border border-[#e8e2d9] dark:border-[#2e2822] text-[#786d63] dark:text-[#b0a59a] hover:bg-[#fcfaf7] dark:hover:bg-[#121110] hover:text-[#2b2520] dark:hover:text-[#f2ebe4] cursor-pointer shadow-sm hover:border-[#b45309]/50 dark:hover:border-[#f59e0b]/50 transition-all flex items-center justify-center"
-                  title={sortOrder === "asc" ? "Sort Ascending" : "Sort Descending"}
-                >
-                  {sortOrder === "asc" ? (
-                    <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
+          {(displayMode === "userLibrary" && userLibraryBooks.length > 0)
+            && <FilterAndSortBar
+                activeFilter={activeFilter}
+                onClickFilter={setActiveFilter}
+                userLibraryBooks={userLibraryBooks}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onClickSortBy={setSortBy}
+                onClickSortOrder={setSortOrder}
+                averageBookRating={averageBookRating}
+              />
+          }
 
 
           {/* USER LIBRARY VIEW */}
@@ -314,7 +152,7 @@ function App() {
                   <span>🔍</span> Search Books
                 </button>
               </div>
-            ) : filteredLibraryBooks.length === 0 ? (
+            ) : filteredAndSortedLibraryBooks.length === 0 ? (
               (() => {
                 const filterInfo = getFilterEmptyStateInfo(activeFilter);
                 return (
@@ -339,25 +177,15 @@ function App() {
               })()
             ) : (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6 w-full pt-2 md:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] md:gap-8">
-                {filteredLibraryBooks
-                  .toSorted((a: UserLibraryBook, b: UserLibraryBook) => {
-                    let valA = (sortBy === "Date Added") ? a.dateAdded : (sortBy === "Title" ? a.title.toLowerCase() : a.author.toLowerCase())
-                    let valB = (sortBy === "Date Added") ? b.dateAdded : (sortBy === "Title" ? b.title.toLowerCase() : b.author.toLowerCase())
-
-                    if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-                    if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-
-                    return 0;
-                  })
-                  .map((book) => (
-                    <UserLibraryBookCard
-                      key={book.id}
-                      book={book}
-                      onRemoveFromLibrary={removeFromUserLibrary}
-                      onChangeReadingStatus={updateBookReadingStatus}
-                      onChangeRating={updateBookRating}
-                    />
-                  ))}
+                {filteredAndSortedLibraryBooks.map((book) => (
+                  <UserLibraryBookCard
+                    key={book.id}
+                    book={book}
+                    onRemoveFromLibrary={removeFromUserLibrary}
+                    onChangeReadingStatus={updateBookReadingStatus}
+                    onChangeRating={updateBookRating}
+                  />
+                ))}
               </div>
             )
           )}
@@ -433,5 +261,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

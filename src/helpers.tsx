@@ -1,4 +1,4 @@
-import type { UserLibraryBook } from "./Book";
+import type { UserLibraryBook } from "./types.ts";
 
 function getFilterEmptyStateInfo(filter: string) {
   switch (filter) {
