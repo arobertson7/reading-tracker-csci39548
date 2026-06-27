@@ -92,6 +92,7 @@ export default function App() {
       />
 
       <main className="flex-1 p-6 md:py-12 md:px-16 flex flex-col gap-8 md:gap-10 max-w-full md:h-full md:overflow-y-auto">
+
         {displayMode === "searchBooks" && <SearchBar onSearch={fetchSearchResults} />}
 
         <section>
@@ -253,6 +254,7 @@ export default function App() {
             )
           )}
         </section>
+        
       </main>
 
       <footer className="text-center p-6 text-[0.75rem] text-[#a39b92] dark:text-[#85796d] border-t border-[#e8e2d9] dark:border-[#2e2822] bg-[#ffffff] dark:bg-[#1a1816] md:hidden">

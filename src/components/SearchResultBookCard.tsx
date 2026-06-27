@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { type Book } from '../types.ts';
 
 interface SearchResultBookCardProps {
@@ -8,12 +7,6 @@ interface SearchResultBookCardProps {
 }
 
 function SearchResultBookCard({ book, onToggleAddToLibrary, addedToLibrary }: SearchResultBookCardProps) {
-  const [inUserLibrary, setInUserLibrary] = useState<boolean>(addedToLibrary);
-
-  function handleToggleAddToLibrary() {
-    setInUserLibrary(!inUserLibrary);
-    onToggleAddToLibrary(book);
-  }
 
   return (
     <div className="group bg-[#ffffff] dark:bg-[#1c1a18] border border-[#e8e2d9] dark:border-[#3d352e] rounded-xl overflow-hidden flex flex-col shadow-[0_2px_6px_rgba(43,37,32,0.04)] dark:shadow-[0_2px_6px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] cursor-pointer relative h-full min-h-[325px] hover:-translate-y-[5px] hover:shadow-[0_12px_24px_rgba(43,37,32,0.1)] dark:hover:shadow-[0_12px_24px_rgba(0,0,0,0.4)] hover:border-[#b45309] dark:hover:border-[#f59e0b]">
@@ -34,14 +27,14 @@ function SearchResultBookCard({ book, onToggleAddToLibrary, addedToLibrary }: Se
 
         <button
           className={`mt-auto self-center py-[0.45rem] px-[1.1rem] rounded-[20px] border font-sans text-[0.76rem] font-semibold cursor-pointer flex items-center justify-center gap-1 transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(43,37,32,0.06)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] active:translate-y-0 ${
-            inUserLibrary
+            addedToLibrary
               ? 'bg-[#e8f5e9] dark:bg-[#1b4332] text-[#2e7d32] dark:text-[#81c784] border-[#c8e6c9] dark:border-[#2d6a4f] hover:bg-[#2e7d32] dark:hover:bg-[#2d6a4f] hover:text-white hover:border-[#2e7d32] dark:hover:border-[#2d6a4f]'
               : 'bg-[#fef3c7] dark:bg-[#451a03] text-[#b45309] dark:text-[#f59e0b] border-[#e8e2d9] dark:border-[#2e2822] hover:bg-[#b45309] dark:hover:bg-[#f59e0b] hover:text-white hover:border-[#b45309] dark:hover:border-[#f59e0b]'
           }`}
           type="button"
-          onClick={handleToggleAddToLibrary}
+          onClick={() => onToggleAddToLibrary(book)}
         >
-          {inUserLibrary ? "✓ Added to Library" : "+ Add to Library"}
+          {addedToLibrary ? "✓ Added to Library" : "+ Add to Library"}
         </button>
       </div>
     </div>
