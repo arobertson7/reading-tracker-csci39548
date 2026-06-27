@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { type UserLibraryBook } from './Book.tsx';
+import { type UserLibraryBook } from '../types.ts';
 
 interface UserLibraryBookCardProps {
   book: UserLibraryBook;

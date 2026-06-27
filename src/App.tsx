@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating } from './Book.tsx';
-import { UserLibraryBookCard } from './UserLibraryBookCard.tsx';
-import { SearchResultBookCard } from './SearchResultBookCard';
-import SearchBar from './SearchBar';
-import { type OpenLibraryBook } from './OpenLibraryBook';
+import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating, type OpenLibraryBook } from './types.ts';
+import { UserLibraryBookCard } from './components/UserLibraryBookCard.tsx';
+import { SearchResultBookCard } from './components/SearchResultBookCard';
+import SearchBar from './components/SearchBar';
 import noBookCover from './assets/no-cover.png';
 import { getFilterEmptyStateInfo, getAverageBookRating } from './helpers.tsx'
 import { useLibraryBooks } from './hooks/useLibraryBooks.tsx';

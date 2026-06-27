@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { type UserLibraryBook, type Book, type ReadingStatus, type BookRating } from "../Book";
+import { type UserLibraryBook, type Book, type ReadingStatus, type BookRating } from "../types.ts";
 
 const STORAGE_KEY = "user_library_books";
 
