@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { type Book, type UserLibraryBook, type ReadingStatus, type BookRating, type OpenLibraryBook } from './types.ts';
 import { UserLibraryBookCard } from './components/UserLibraryBookCard.tsx';
 import { SearchResultBookCard } from './components/SearchResultBookCard';
@@ -14,7 +14,7 @@ import FilterAndSortBar from './components/FilterAndSortBar.tsx';
 const OPEN_LIBRARY_URL = "https://openlibrary.org/search.json?q="; // simply append the query to the end
 
 export default function App() {
-  const { userLibraryBooks, inUserLibrary, removeFromUserLibrary, toggleAddToUserLibrary, updateBookReadingStatus, updateBookRating} = useLibraryBooks();
+  const { userLibraryBooks, inUserLibrary, removeFromUserLibrary, toggleAddToUserLibrary, updateBookReadingStatus, updateBookRating } = useLibraryBooks();
 
   const [searchResultBooks, setSearchResultBooks] = useState<Book[]>([]);
   const [fetchingSearchResults, setFetchingSearchResults] = useState<boolean>(false);
@@ -254,7 +254,7 @@ export default function App() {
             )
           )}
         </section>
-        
+
       </main>
 
       <footer className="text-center p-6 text-[0.75rem] text-[#a39b92] dark:text-[#85796d] border-t border-[#e8e2d9] dark:border-[#2e2822] bg-[#ffffff] dark:bg-[#1a1816] md:hidden">
